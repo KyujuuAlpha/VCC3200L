@@ -47,7 +47,7 @@ void setPin(unsigned long ulPin, unsigned char val) {
 }
 
 void setPinGPIO(unsigned long ulPort, unsigned char ucPin, unsigned char val) {
-    for (int i = 0; i < PIN_64 + 1; i++) {
+    for (int i = 0; i <= PIN_64; i++) {
         if (pins[i].pinMode == PIN_MODE_1) {
             if (!pins[i].gpio.assigned) {
                 pins[i].gpio.assigned = true;
@@ -71,7 +71,7 @@ unsigned char getPin(unsigned long ulPin) {
 }
 
 unsigned char getPinGPIO(unsigned long ulPort, unsigned char ucPin) {
-    for (int i = 0; i < PIN_64 + 1; i++) {
+    for (int i = 0; i <= PIN_64; i++) {
         if (pins[i].pinMode == PIN_MODE_1) {
             if (pins[i].gpio.assigned) {
                 if (pins[i].gpio.port == ulPort && pins[i].gpio.pin == ucPin) {

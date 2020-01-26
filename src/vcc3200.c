@@ -72,6 +72,9 @@ static void *guiThread(void *var){
 
 void init(void) {
     printf("initialized virtual cpu\n");
+    for (int i = PIN_01; i <= PIN_64; i++) {
+        PinModeSet(i, PIN_MODE_0);
+    }
     /* this variable is our reference to the second thread */
     pthread_t thread;
 
