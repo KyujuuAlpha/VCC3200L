@@ -4,6 +4,8 @@ In development, so not all features have been added as of yet.
 
 Depends on pthreads and GTK 3.0
 
+VERY IMPORTANT NOTE: This is still early in development and so far only debug signals are sent to the terminal (Lab 1 for example).  In the near future, will be able to use #define in a main.c to enable certain things (SPI, Adafruit display, etc.)
+
 To compile, first make sure GTK 3 is installed and run: 
 ```
 cmake .
