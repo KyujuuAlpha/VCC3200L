@@ -10,7 +10,6 @@ struct LED {
 static struct LED led1, led2, led3;
 
 void GPIO_IF_LedConfigure(unsigned char ucPins) {
-    printf("configured led\n");
     if(ucPins & LED1) {
         led1 = (struct LED) { .status = 0 };
     }
@@ -25,7 +24,6 @@ void GPIO_IF_LedConfigure(unsigned char ucPins) {
 }
 
 void GPIO_IF_LedOn(char ledNum) {
-    printf("set led on\n");
     switch(ledNum)
     {
         case MCU_ON_IND:
@@ -61,7 +59,6 @@ void GPIO_IF_LedOn(char ledNum) {
 }
 
 void GPIO_IF_LedOff(char ledNum) {
-    printf("set led off\n");
     switch(ledNum)
     {
         case MCU_ON_IND:
@@ -97,7 +94,6 @@ void GPIO_IF_LedOff(char ledNum) {
 }
 
 unsigned char GPIO_IF_LedStatus(unsigned char ucGPIONum) {
-    printf("checked led\n");
     unsigned char ucLEDStatus;
     switch(ucGPIONum) {
     case MCU_GREEN_LED_GPIO: {
