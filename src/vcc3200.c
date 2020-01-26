@@ -28,8 +28,9 @@ static void sw3 (GtkWidget *widget, gpointer   data)
   setPin(SW3_PIN, 0x00);
 }
 
-static void
-activate (GtkApplication *app,
+// DO NOT KNOW HOW TO USE GTK 3 AS OF YET LOL
+// Taken from the tutorial doc as a temporary solution for gui
+static void activate (GtkApplication *app,
           gpointer        user_data)
 {
   GtkWidget *window;
