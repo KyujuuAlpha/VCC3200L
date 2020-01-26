@@ -24,22 +24,22 @@ void PinModeSet(unsigned long ulPin, unsigned long ulPinMode) {
 
 void PinTypeGPIO(unsigned long ulPin, unsigned long ulPinMode, tBoolean bOpenDrain) {
     PinModeSet(ulPin, ulPinMode);
-    pins[ulPin].pinMode = PIN_MODE_1;
+    pins[ulPin].pinMode = PIN_MODE_1;  //redefine pin mode 1 to GPIO
 }
 
 void PinTypeSPI(unsigned long ulPin, unsigned long ulPinMode) {
     PinModeSet(ulPin, ulPinMode);
-    pins[ulPin].pinMode = PIN_MODE_2;
+    pins[ulPin].pinMode = PIN_MODE_2; //redefine pin mode 2 to SPI
 }
 
 void PinTypeUART(unsigned long ulPin, unsigned long ulPinMode) {
     PinModeSet(ulPin, ulPinMode);
-    pins[ulPin].pinMode = PIN_MODE_3;
+    pins[ulPin].pinMode = PIN_MODE_3; //redefine pin mode 3 to UART
 }
 
 void PinTypeI2C(unsigned long ulPin, unsigned long ulPinMode) {
     PinModeSet(ulPin, ulPinMode);
-    pins[ulPin].pinMode = PIN_MODE_4;
+    pins[ulPin].pinMode = PIN_MODE_4; //redefine pin mode 4 to i2c
 }
 
 void setPin(unsigned long ulPin, unsigned char val) {
