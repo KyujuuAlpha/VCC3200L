@@ -14,13 +14,13 @@
 
 static void switch2Activated(GtkWidget *widget, gpointer data) {
   setPin(SW2_PIN, 0xff);
-  usleep(250000);
+  usleep(SWITCH_DELAY);
   setPin(SW2_PIN, 0x00);
 }
 
 static void switch3Activated(GtkWidget *widget, gpointer data) {
   setPin(SW3_PIN, 0xff);
-  usleep(250000);
+  usleep(SWITCH_DELAY);
   setPin(SW3_PIN, 0x00);
 }
 
