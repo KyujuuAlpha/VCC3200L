@@ -13,19 +13,16 @@ void GPIO_IF_LedConfigure(unsigned char ucPins) {
     if(ucPins & LED1) {
         led1 = (struct LED) { .status = 0 };
     }
-
     if(ucPins & LED2) {
         led2 = (struct LED) { .status = 0 };
     }
-
     if(ucPins & LED3) {
         led3 = (struct LED) { .status = 0 };
     }
 }
 
 void GPIO_IF_LedOn(char ledNum) {
-    switch(ledNum)
-    {
+    switch(ledNum) {
         case MCU_ON_IND:
         case MCU_EXECUTE_SUCCESS_IND:
         case MCU_GREEN_LED_GPIO: {
@@ -59,8 +56,7 @@ void GPIO_IF_LedOn(char ledNum) {
 }
 
 void GPIO_IF_LedOff(char ledNum) {
-    switch(ledNum)
-    {
+    switch(ledNum) {
         case MCU_ON_IND:
         case MCU_EXECUTE_SUCCESS_IND:
         case MCU_GREEN_LED_GPIO: {

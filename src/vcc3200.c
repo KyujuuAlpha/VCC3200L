@@ -10,74 +10,67 @@
 #include "pin.h"
 #include "gpio.h"
 #include "prcm.h"
+#include "config.h"
 
-#define SW2_PIN PIN_15
-#define SW3_PIN PIN_04
-
-static void sw2 (GtkWidget *widget, gpointer   data)
-{
+static void switch2Activated(GtkWidget *widget, gpointer data) {
   setPin(SW2_PIN, 0xff);
-  sleep (1);
+  usleep(250000);
   setPin(SW2_PIN, 0x00);
 }
 
-static void sw3 (GtkWidget *widget, gpointer   data)
-{
+static void switch3Activated(GtkWidget *widget, gpointer data) {
   setPin(SW3_PIN, 0xff);
-  sleep (1);
+  usleep(250000);
   setPin(SW3_PIN, 0x00);
 }
 
-// DO NOT KNOW HOW TO USE GTK 3 AS OF YET LOL
-// Taken from the tutorial doc as a temporary solution for gui
-static void activate (GtkApplication *app,
-          gpointer        user_data)
-{
-  GtkWidget *window;
-  GtkWidget *button;
-  GtkWidget *button2;
-  GtkWidget *button_box;
+static GtkWidget *createSwitchWindow(GtkApplication *app) {
+  GtkWidget *switchWindow;
+  GtkWidget *switchBox;
+  GtkWidget *sw2Button, *sw3Button;
 
-  window = gtk_application_window_new (app);
-  gtk_window_set_title (GTK_WINDOW (window), "Window");
-  gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+  switchWindow = gtk_application_window_new(app);
+  gtk_window_set_title(GTK_WINDOW(switchWindow), "Switches");
+  gtk_window_set_default_size(GTK_WINDOW (switchWindow), 200, 100);
 
-  button_box = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
-  gtk_container_add (GTK_CONTAINER (window), button_box);
+  switchBox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_container_add(GTK_CONTAINER(switchWindow), switchBox);
 
-  button = gtk_button_new_with_label ("SW2");
-  g_signal_connect (button, "clicked", G_CALLBACK (sw2), NULL);
-  //g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_widget_destroy), window);
-  gtk_container_add (GTK_CONTAINER (button_box), button);
+  sw2Button = gtk_button_new_with_label("SW2");
+  g_signal_connect(sw2Button, "clicked", G_CALLBACK(switch2Activated), NULL);
 
-  button2 = gtk_button_new_with_label ("SW3");
-  g_signal_connect (button2, "clicked", G_CALLBACK (sw3), NULL);
-  //g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_widget_destroy), window);
-  gtk_container_add (GTK_CONTAINER (button_box), button2);
+  sw3Button = gtk_button_new_with_label("SW3");
+  g_signal_connect(sw3Button, "clicked", G_CALLBACK(switch3Activated), NULL);
 
-  gtk_widget_show_all (window);
+  gtk_container_add(GTK_CONTAINER(switchBox), sw2Button);
+  gtk_container_add(GTK_CONTAINER(switchBox), sw3Button);
+
+  return switchWindow;
+}
+
+static void gtkInit(GtkApplication *app, gpointer user_data) {
+  if (ENABLE_SWITCHES) {
+    GtkWidget *switchWindow = createSwitchWindow(app);
+    gtk_widget_show_all(switchWindow);
+  }
 }
 
 static void *guiThread(void *var){
-    GtkApplication *app;
-    int status;
-
-    app = gtk_application_new ("org.gtk.example", G_APPLICATION_FLAGS_NONE);
-    g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
-    status = g_application_run (G_APPLICATION (app), 0, 0);
-    g_object_unref (app);
-
-    return NULL;
+  GtkApplication *app = gtk_application_new("com.troi.vcc3200", G_APPLICATION_FLAGS_NONE);
+  g_signal_connect(app, "activate", G_CALLBACK(gtkInit), NULL);
+  g_application_run(G_APPLICATION(app), 0, 0);
+  g_object_unref(app);
+  return NULL;
 }
 
 void init(void) {
-    printf("initialized virtual cpu\n");
-    for (int i = PIN_01; i <= PIN_64; i++) {
-        PinModeSet(i, PIN_MODE_0);
-    }
-    /* this variable is our reference to the second thread */
-    pthread_t thread;
+  printf("initialized virtual cpu\n");
+  for (int i = PIN_01; i <= PIN_64; i++) {
+    PinModeSet(i, PIN_MODE_0);
+  }
 
+  pthread_t thread;
+  if (ENABLE_GUI) {
     pthread_create(&thread, NULL, guiThread, NULL); 
-    //pthread_join(thread, NULL); 
+  }
 }
