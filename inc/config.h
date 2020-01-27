@@ -23,5 +23,6 @@
 #define ENABLE_ACCEL 1
 
 #define SPI_MAX_PINS 7
+#define PIN_FLAG 64
 
 #endif

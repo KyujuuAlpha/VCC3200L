@@ -138,7 +138,7 @@ static GtkWidget *createLEDWindow(GtkApplication *app) {
 // OLED STUFF
 static bool oledFlag;
 static int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-static unsigned char cmd = 0, data = 0, color1, color2;
+static unsigned char cmd = 0, data = 0, color1 = 0, color2 = 0;
 
 static void closeOledWindow(void) {
   oledFlag = false;
@@ -149,48 +149,57 @@ static gboolean oledEventLoop(gpointer user_data) {
     return G_SOURCE_REMOVE;
   }
   unsigned long pin = 0;
-  unsigned char val = 0;
-  bool command = false;
+  unsigned char val = 0, dcVal = 0, mosiVal = 0;
+  bool dcFlag = false, pinFlag = false;
   
- // printf("checking spi..\n");
   while (processPinEntry(&pin, &val)) {
-    if (pin == OLED_DC && !val) {
-      command = true;
-      continue;
-    }
-    if (pin == OLED_MOSI && command) {
-      cmd = val;
-      data = 0;
-    } else if (pin == OLED_MOSI && cmd) {
-      if (cmd == CMD_SETCOLUMN) {
+    pinFlag = PIN_FLAG & pin ? true : false;
+    pin = ~PIN_FLAG & pin;
+    if (cmd == 0) {
+      if (pin == OLED_DC && pinFlag) {
+        dcFlag = true;
+        dcVal = val;
+      } else if (pin == OLED_MOSI) {
+        mosiVal = val; 
+      }
+    } else if (pin == OLED_MOSI && cmd && !pinFlag) {
+      if (cmd  == CMD_SETCOLUMN) {
         if (data == 0) {
           x1 = val;
           data = 1;
         } else if (data == 1) {
           x2 = val;
+          cmd = 0;
           data = 2;
         }
-      }
-      if (cmd == CMD_SETROW) {
+      } else if (cmd == CMD_SETROW) {
         if (data == 0) {
           y1 = val;
           data = 1;
         } else if (data == 1) {
           y2 = val;
+          cmd = 0;
           data = 2;
         }
-      }
-      if (cmd == CMD_WRITERAM) {
+      } else if (cmd == CMD_WRITERAM) {
         if (data == 0) {
           color1 = val;
           data = 1;
         } else if (data == 1) {
           color2 = val;
           data = 2;
+          cmd = 0;
+          printf("drawing from %d,%d to %d,%d \n", x1, y1, x2, y2);
           gtk_widget_queue_draw(user_data);
         }
+      } else {
+        cmd = 0;
       }
     }
+  }
+  if (!dcFlag && dcVal == 0) {
+    cmd = mosiVal;
+    data = 0;
   }
   return G_SOURCE_CONTINUE;
 }

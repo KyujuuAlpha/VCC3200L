@@ -76,6 +76,11 @@ void SPICSEnable(unsigned long ulBase) {
         }
         current->CS = true;
         current->next = NULL;
+        for (int i = PIN_01; i <= PIN_64; i++) {
+            if (getPin(i)) {
+                spiAdd(i | PIN_FLAG, getPin(i));
+            }
+        }
         if (next == NULL) {
             next = current;
         } else {
