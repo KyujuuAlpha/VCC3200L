@@ -13,7 +13,7 @@
 #define LED_TIMEOUT 100
 
 #define ENABLE_OLED 1
-#define OLED_TIMEOUT 1
+#define OLED_TIMEOUT 100
 #define OLED_CLK  PIN_05
 #define OLED_MOSI PIN_07
 #define OLED_DC   PIN_18

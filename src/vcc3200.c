@@ -136,9 +136,15 @@ static GtkWidget *createLEDWindow(GtkApplication *app) {
 }
 
 // OLED STUFF
+struct OLEDPixel {
+  GdkRGBA color;
+  bool change;
+};
 static bool oledFlag;
 static int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 static unsigned char cmd = 0, data = 0, color1 = 0, color2 = 0;
+static struct OLEDPixel display[128][128];
+
 
 static void closeOledWindow(void) {
   oledFlag = false;
@@ -148,60 +154,82 @@ static gboolean oledEventLoop(gpointer user_data) {
   if (!oledFlag) {
     return G_SOURCE_REMOVE;
   }
-  unsigned long pin = 0;
-  unsigned char val = 0, dcVal = 0, mosiVal = 0;
-  bool dcFlag = false, pinFlag = false;
-  
-  while (processPinEntry(&pin, &val)) {
-    pinFlag = PIN_FLAG & pin ? true : false;
-    pin = ~PIN_FLAG & pin;
-    if (cmd == 0) {
-      if (pin == OLED_DC && pinFlag) {
-        dcFlag = true;
-        dcVal = val;
-      } else if (pin == OLED_MOSI) {
-        mosiVal = val; 
-      }
-    } else if (pin == OLED_MOSI && cmd && !pinFlag) {
-      if (cmd  == CMD_SETCOLUMN) {
-        if (data == 0) {
-          x1 = val;
-          data = 1;
-        } else if (data == 1) {
-          x2 = val;
-          cmd = 0;
-          data = 2;
-        }
-      } else if (cmd == CMD_SETROW) {
-        if (data == 0) {
-          y1 = val;
-          data = 1;
-        } else if (data == 1) {
-          y2 = val;
-          cmd = 0;
-          data = 2;
-        }
-      } else if (cmd == CMD_WRITERAM) {
-        if (data == 0) {
-          color1 = val;
-          data = 1;
-        } else if (data == 1) {
-          color2 = val;
-          data = 2;
-          cmd = 0;
-          printf("drawing from %d,%d to %d,%d \n", x1, y1, x2, y2);
-          gtk_widget_queue_draw(user_data);
-        }
-      } else {
-        cmd = 0;
+  for (int i = 0; i < 128; i++) {
+    for (int j = 0; j < 128; j++) {
+      if(display[j][i].change) {
+        gtk_widget_queue_draw(user_data);
       }
     }
   }
-  if (!dcFlag && dcVal == 0) {
-    cmd = mosiVal;
-    data = 0;
-  }
   return G_SOURCE_CONTINUE;
+}
+
+static void *oledProcessingThread(void *var){
+  unsigned long pin = 0;
+  unsigned char val = 0, dcVal = 0, mosiVal = 0;
+  bool dcFlag = false, pinFlag = false;
+  while (oledFlag) {
+    while (processPinEntry(&pin, &val)) {
+      pinFlag = PIN_FLAG & pin ? true : false;
+      pin = ~PIN_FLAG & pin;
+      if (cmd == 0) {
+        if (pin == OLED_DC && pinFlag) {
+          dcFlag = true;
+          dcVal = val;
+        } else if (pin == OLED_MOSI) {
+          mosiVal = val; 
+        }
+      } else if (pin == OLED_MOSI && cmd && !pinFlag) {
+        if (cmd  == CMD_SETCOLUMN) {
+          if (data == 0) {
+            x1 = val;
+            data = 1;
+          } else if (data == 1) {
+            x2 = val;
+            cmd = 0;
+            data = 2;
+          }
+        } else if (cmd == CMD_SETROW) {
+          if (data == 0) {
+            y1 = val;
+            data = 1;
+          } else if (data == 1) {
+            y2 = val;
+            cmd = 0;
+            data = 2;
+          }
+        } else if (cmd == CMD_WRITERAM) {
+          if (data == 0) {
+            color1 = val;
+            data = 1;
+            for (int i = x1; i <= x2 - x1; i++) {
+              for (int j = y1; j <= y2 - y1; j++) {
+                display[j][i].change = true;
+                display[j][i].color.red = 1.0;
+              }
+            }
+          } else if (data == 1) {
+            color2 = val;
+            data = 2;
+            cmd = 0;
+          }
+        } else {
+          cmd = 0;
+        }
+      }
+    }
+    if (!dcFlag && dcVal == 0) {
+      cmd = mosiVal;
+      data = 0;
+    }
+    pin = 0;
+    val = 0;
+    dcVal = 0;
+    mosiVal = 0;
+    dcFlag = false;
+    pinFlag = false;
+  }
+  return NULL;
 }
 
 static gboolean oledDraw(GtkWidget *widget, cairo_t *cr, gpointer data) {
@@ -215,10 +243,15 @@ static gboolean oledDraw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 
   gtk_render_background(context, cr, 0, 0, width, height);
 
-  //draw  
-  cairo_rectangle(cr, x1 * (width / 128), y1 * (width / 128), (x2 - x1) * (width / 128), (y2 - y1) * (width / 128));
-  gdk_cairo_set_source_rgba(cr, &red);
-  cairo_fill (cr);
+  //draw 
+  for (int i = 0; i < 128; i++) {
+    for (int j = 0; j < 128; j++) {
+      cairo_rectangle(cr, i * (width / 128), j * (height / 128), (width / 128), (height / 128));
+      gdk_cairo_set_source_rgba(cr, &display[j][i].color);
+      cairo_fill (cr);
+      display[j][i].change = false;
+    }
+  } 
 
   return FALSE;
 }
@@ -241,8 +274,17 @@ static GtkWidget *createOLEDWindow(GtkApplication *app) {
   g_signal_connect(oledWindow, "destroy", G_CALLBACK(closeOledWindow), NULL);
   oledFlag = true;
 
+  for (int i = 0; i < 128; i++) {
+    for (int j = 0; j < 128; j++) {
+      display[j][i] = (struct OLEDPixel) { (GdkRGBA) { 0.0, 0.0, 0.0, 1.0 }, true };
+    }
+  }
+
+  pthread_t thread;
+  pthread_create(&thread, NULL, oledProcessingThread, NULL); 
+
   return oledWindow;
-}
+  }
 
 // MAIN GUI STUFF
 static void gtkInit(GtkApplication *app, gpointer user_data) {
@@ -260,7 +302,7 @@ static void gtkInit(GtkApplication *app, gpointer user_data) {
   }
 }
 
-static void *guiThread(void *var){
+static void *guiThread(void *var) {
   GtkApplication *app = gtk_application_new("com.troi.vcc3200", G_APPLICATION_FLAGS_NONE);
   g_signal_connect(app, "activate", G_CALLBACK(gtkInit), NULL);
   g_application_run(G_APPLICATION(app), 0, 0);
