@@ -150,6 +150,8 @@ extern long SPITransfer(unsigned long ulBase, unsigned char *ucDout,
                    unsigned char *ucDin, unsigned long ulSize,
                    unsigned long ulFlags);
 
+void spiAdd(unsigned long ulPin, unsigned char val);
+unsigned char processPinEntry(unsigned long *ulPin, unsigned char *val);
 
 //*****************************************************************************
 //

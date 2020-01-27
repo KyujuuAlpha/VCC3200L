@@ -1,5 +1,5 @@
-#ifndef __VCC3200_H__
-#define __VCC3200_H__
+#ifndef VCC3200_H_
+#define VCC3200_H_
 
 void init(void);
 

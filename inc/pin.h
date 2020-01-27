@@ -170,8 +170,10 @@ extern void PinTypeSDHost(unsigned long ulPin,unsigned long ulPinMode);
 
 void setPin(unsigned long ulPin, unsigned char val);
 void setPinGPIO(unsigned long ulPort, unsigned char ucPin, unsigned char val);
+void setPinSPI(unsigned long ulPin, unsigned char val);
 
 unsigned char getPin(unsigned long ulPin);
+unsigned long getPinMode(unsigned long ulPin);
 unsigned char getPinGPIO(unsigned long ulPort, unsigned char ucPin);
 
 #ifdef __cplusplus

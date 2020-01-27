@@ -9,21 +9,23 @@
 #include "hw_memmap.h"
 #include "hw_gpio.h"
 #include "pin.h"
+#include "spi.h"
 #include "gpio.h"
 #include "gpio_if.h"
 #include "prcm.h"
 #include "config.h"
+#include "oled.h"
 
 // SWITCH STUFF
 static void switch2Activated(GtkWidget *widget, gpointer data) {
   setPin(SW2_PIN, 0xff);
-  usleep(SWITCH_DELAY);
+  usleep(SWITCH_DELAY * 1000);
   setPin(SW2_PIN, 0x00);
 }
 
 static void switch3Activated(GtkWidget *widget, gpointer data) {
   setPin(SW3_PIN, 0xff);
-  usleep(SWITCH_DELAY);
+  usleep(SWITCH_DELAY * 1000);
   setPin(SW3_PIN, 0x00);
 }
 
@@ -133,6 +135,106 @@ static GtkWidget *createLEDWindow(GtkApplication *app) {
   return ledWindow;
 }
 
+// OLED STUFF
+static bool oledFlag;
+static int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+static unsigned char cmd = 0, data = 0, color1, color2;
+
+static void closeOledWindow(void) {
+  oledFlag = false;
+}
+
+static gboolean oledEventLoop(gpointer user_data) {
+  if (!oledFlag) {
+    return G_SOURCE_REMOVE;
+  }
+  unsigned long pin = 0;
+  unsigned char val = 0;
+  bool command = false;
+  
+ // printf("checking spi..\n");
+  while (processPinEntry(&pin, &val)) {
+    if (pin == OLED_DC && !val) {
+      command = true;
+      continue;
+    }
+    if (pin == OLED_MOSI && command) {
+      cmd = val;
+      data = 0;
+    } else if (pin == OLED_MOSI && cmd) {
+      if (cmd == CMD_SETCOLUMN) {
+        if (data == 0) {
+          x1 = val;
+          data = 1;
+        } else if (data == 1) {
+          x2 = val;
+          data = 2;
+        }
+      }
+      if (cmd == CMD_SETROW) {
+        if (data == 0) {
+          y1 = val;
+          data = 1;
+        } else if (data == 1) {
+          y2 = val;
+          data = 2;
+        }
+      }
+      if (cmd == CMD_WRITERAM) {
+        if (data == 0) {
+          color1 = val;
+          data = 1;
+        } else if (data == 1) {
+          color2 = val;
+          data = 2;
+          gtk_widget_queue_draw(user_data);
+        }
+      }
+    }
+  }
+  return G_SOURCE_CONTINUE;
+}
+
+static gboolean oledDraw(GtkWidget *widget, cairo_t *cr, gpointer data) {
+  guint width, height;
+  GtkStyleContext *context;
+
+  context = gtk_widget_get_style_context(widget);
+
+  width = gtk_widget_get_allocated_width(widget);
+  height = gtk_widget_get_allocated_height(widget);
+
+  gtk_render_background(context, cr, 0, 0, width, height);
+
+  //draw  
+  cairo_rectangle(cr, x1 * (width / 128), y1 * (width / 128), (x2 - x1) * (width / 128), (y2 - y1) * (width / 128));
+  gdk_cairo_set_source_rgba(cr, &red);
+  cairo_fill (cr);
+
+  return FALSE;
+}
+
+static GtkWidget *createOLEDWindow(GtkApplication *app) {
+  GtkWidget *oledWindow;
+  GtkWidget *oledArea;
+
+  oledWindow = gtk_application_window_new(app);
+  gtk_window_set_title(GTK_WINDOW(oledWindow), "OLED");
+  gtk_window_set_default_size(GTK_WINDOW (oledWindow), 128, 128);
+
+  oledArea = gtk_drawing_area_new();
+  gtk_widget_set_size_request(oledArea, 128, 128);
+  g_signal_connect(G_OBJECT(oledArea), "draw", G_CALLBACK(oledDraw), NULL);
+  gtk_container_add(GTK_CONTAINER(oledWindow), oledArea);
+
+  g_timeout_add(OLED_TIMEOUT, oledEventLoop, oledWindow);
+  
+  g_signal_connect(oledWindow, "destroy", G_CALLBACK(closeOledWindow), NULL);
+  oledFlag = true;
+
+  return oledWindow;
+}
+
 // MAIN GUI STUFF
 static void gtkInit(GtkApplication *app, gpointer user_data) {
   if (ENABLE_SWITCHES) {
@@ -142,6 +244,10 @@ static void gtkInit(GtkApplication *app, gpointer user_data) {
   if (ENABLE_LEDS) {
     GtkWidget *ledWindow = createLEDWindow(app);
     gtk_widget_show_all(ledWindow);
+  }
+  if (ENABLE_OLED) {
+    GtkWidget *oledWindow = createOLEDWindow(app);
+    gtk_widget_show_all(oledWindow);
   }
 }
 
