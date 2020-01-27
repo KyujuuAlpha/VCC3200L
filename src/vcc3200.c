@@ -118,7 +118,7 @@ static GtkWidget *createLEDWindow(GtkApplication *app) {
 
   ledWindow = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(ledWindow), "LEDs");
-  gtk_window_set_default_size(GTK_WINDOW (ledWindow), 250, 100);
+  gtk_window_set_default_size(GTK_WINDOW (ledWindow), 300, 100);
 
   ledArea = gtk_drawing_area_new();
   gtk_widget_set_size_request(ledArea, 100, 100);
