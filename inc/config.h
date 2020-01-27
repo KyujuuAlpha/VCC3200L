@@ -6,6 +6,8 @@
 #define ENABLE_SWITCHES 1
 #define SWITCH_DELAY    250000
 
+#define ENABLE_LEDS 1
+#define LED_TIMEOUT 100
 
 #define SW2_PIN PIN_15
 #define SW3_PIN PIN_04

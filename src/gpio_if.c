@@ -1,4 +1,3 @@
-#include "stdbool.h"
 #include "gpio_if.h"
 
 #include <stdio.h>
