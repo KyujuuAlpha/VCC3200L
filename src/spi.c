@@ -65,7 +65,7 @@ void SPIDataGet(unsigned long ulBase, unsigned long *pulData) {
 
 void SPIDataPut(unsigned long ulBase, unsigned long ulData) {
     setPinSPI(mosiPin, ulData);
-    usleep(100);
+    usleep(50);
 }
 
 void SPICSEnable(unsigned long ulBase) {
@@ -129,8 +129,7 @@ unsigned char processPinEntry(unsigned long *ulPin, unsigned char *val) {
                 return true;
             }
         }
-        struct SPIEntry *entry;
-        entry = next;
+        struct SPIEntry *entry = next;
         next = next->next;
         free(entry);
     }
