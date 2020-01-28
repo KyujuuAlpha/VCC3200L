@@ -182,19 +182,19 @@ static void *oledProcessingThread(void *var) {
       } else if (dcFlag && pin == OLED_MOSI && !pinFlag && cmd) {
         if (cmd == CMD_SETCOLUMN) {
           if (data == 0) {
-            x1 = val > OLED_WIDTH ? OLED_WIDTH - 1 : val < 0 ? 0 : val;
+            x1 = val;
             currX = x1;
             data = 1;
           } else if (data == 1) {
-            x2 = val > OLED_WIDTH ? OLED_WIDTH - 1 : val < 0 ? 0 : val;
+            x2 = val;
           }
         } else if (cmd == CMD_SETROW) {
           if (data == 0) {
-            y1 = val > OLED_HEIGHT ? OLED_HEIGHT - 1 : val < 0 ? 0 : val;
+            y1 = val;
             currY = y1;
             data = 1;
           } else if (data == 1) {
-            y2 = val > OLED_HEIGHT ? OLED_HEIGHT - 1 : val < 0 ? 0 : val;
+            y2 = val;
           }
         } else if (cmd == CMD_WRITERAM) {
           if (data == 0) { //upper 2 bits
@@ -203,10 +203,12 @@ static void *oledProcessingThread(void *var) {
           } else if (data == 1) { //lower 2 bits
             data = 0;
             color = (color << 8) | val;
-            display[currY][currX].change = true;
-            display[currY][currX].color.red = (((color & 0xF800) >> 11)) / 31.0;
-            display[currY][currX].color.green = (((color & 0x07E0) >> 5)) / 63.0;
-            display[currY][currX].color.blue = ((color & 0x001F)) / 31.0;
+            if (currX < OLED_WIDTH && currX >= 0 && currY < OLED_HEIGHT && currY >= 0) {
+              display[currY][currX].change = true;
+              display[currY][currX].color.red = (((color & 0xF800) >> 11)) / 31.0;
+              display[currY][currX].color.green = (((color & 0x07E0) >> 5)) / 63.0;
+              display[currY][currX].color.blue = ((color & 0x001F)) / 31.0;
+            }
             currX++;
             if (currX > x2) {
               currX = x1;
@@ -222,6 +224,9 @@ static void *oledProcessingThread(void *var) {
     if (!dcFlag && dcVal == 0 && processed) {
       cmd = mosiVal;
       data = 0;
+    }
+    if (!processed) {
+      usleep(100);
     }
     pin = 0;
     val = 0;
