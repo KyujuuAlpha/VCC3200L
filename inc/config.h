@@ -15,7 +15,7 @@
 #define ENABLE_OLED 1
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 128
-#define OLED_TIMEOUT 100
+#define OLED_TIMEOUT 16
 
 #define OLED_CLK  PIN_05
 #define OLED_MOSI PIN_07
