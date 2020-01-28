@@ -119,7 +119,7 @@ void spiAdd(unsigned long ulPin, unsigned char val) {
 }
 
 unsigned char processPinEntry(unsigned long *ulPin, unsigned char *val) {
-    if (next != NULL && !next->CS) {
+    if (next != NULL && !next->CS && next->next != NULL) {
         for (int i = 0; i < SPI_MAX_PINS; i++) {
             if(next->pins[i].pin != -1) {
                 *ulPin = next->pins[i].pin;

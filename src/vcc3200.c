@@ -168,7 +168,6 @@ static void *oledProcessingThread(void *var) {
   unsigned long pin = 0;
   unsigned char val = 0, dcVal = 0, mosiVal = 0;
   bool dcFlag = false, pinFlag = false, processed = false;
-  unsigned int count = 0;
   while (oledFlag) {
     while (processPinEntry(&pin, &val)) {
       processed = true;
@@ -183,19 +182,19 @@ static void *oledProcessingThread(void *var) {
       } else if (dcFlag && pin == OLED_MOSI && !pinFlag && cmd) {
         if (cmd == CMD_SETCOLUMN) {
           if (data == 0) {
-            currX = val;
-            x1 = val;
+            x1 = val > OLED_WIDTH ? OLED_WIDTH - 1 : val < 0 ? 0 : val;
+            currX = x1;
             data = 1;
           } else if (data == 1) {
-            x2 = val;
+            x2 = val > OLED_WIDTH ? OLED_WIDTH - 1 : val < 0 ? 0 : val;
           }
         } else if (cmd == CMD_SETROW) {
           if (data == 0) {
-            currY = val;
-            y1 = val;
+            y1 = val > OLED_HEIGHT ? OLED_HEIGHT - 1 : val < 0 ? 0 : val;
+            currY = y1;
             data = 1;
           } else if (data == 1) {
-            y2 = val;
+            y2 = val > OLED_HEIGHT ? OLED_HEIGHT - 1 : val < 0 ? 0 : val;
           }
         } else if (cmd == CMD_WRITERAM) {
           if (data == 0) {
@@ -207,7 +206,6 @@ static void *oledProcessingThread(void *var) {
             display[currY][currX].color.red = ((color & 0xF800) >> 11) / 31;
             display[currY][currX].color.green = ((color & 0x07E0) >> 5) / 63;
             display[currY][currX].color.blue = (color & 0x001F) / 31;
-            count++;
             currX++;
             if (currX > x2) {
               currX = x1;
@@ -223,7 +221,6 @@ static void *oledProcessingThread(void *var) {
     if (!dcFlag && dcVal == 0 && processed) {
       cmd = mosiVal;
       data = 0;
-      printf("caught %x\n", cmd);
     }
     pin = 0;
     val = 0;
@@ -266,10 +263,10 @@ static GtkWidget *createOLEDWindow(GtkApplication *app) {
 
   oledWindow = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(oledWindow), "OLED");
-  gtk_window_set_default_size(GTK_WINDOW (oledWindow), OLED_WIDTH, OLED_HEIGHT);
+  gtk_window_set_default_size(GTK_WINDOW (oledWindow), OLED_WIDTH * 2, OLED_HEIGHT * 2);
 
   oledArea = gtk_drawing_area_new();
-  gtk_widget_set_size_request(oledArea, OLED_WIDTH, OLED_HEIGHT);
+  gtk_widget_set_size_request(oledArea, OLED_WIDTH * 2, OLED_HEIGHT * 2);
   g_signal_connect(G_OBJECT(oledArea), "draw", G_CALLBACK(oledDraw), NULL);
   gtk_container_add(GTK_CONTAINER(oledWindow), oledArea);
 
