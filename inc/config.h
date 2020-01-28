@@ -3,16 +3,16 @@
 
 #define ENABLE_GUI 1
 
-#define ENABLE_SWITCHES 0
+#define ENABLE_SWITCHES 1
 #define SWITCH_DELAY    250
 
 #define SW2_PIN PIN_15
 #define SW3_PIN PIN_04
 
-#define ENABLE_LEDS 0
+#define ENABLE_LEDS 1
 #define LED_TIMEOUT 100
 
-#define ENABLE_OLED 1
+#define ENABLE_OLED 0
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 128
 #define OLED_TIMEOUT 16

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "i2c_if.h"
 #include "config.h"
 
@@ -49,12 +50,13 @@ int I2C_IF_Read(unsigned char ucDevAddr, unsigned char *pucData, unsigned char u
             for (int j = 0; j < I2C_REG_COUNT; j++) {
                 if(devices[i].registers[j].id == find) {
                     *pucData = devices[i].registers[j].data;
-                    return;
+                    return 1;
                 }
             }
         }
     }
     *pucData = 0;
+    return 0;
 }
 
 void writeRegister(unsigned char dev, unsigned char reg, int data) {
