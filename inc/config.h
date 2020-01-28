@@ -24,8 +24,15 @@
 #define OLED_OC   PIN_06
 
 #define ENABLE_ACCEL 1
+#define ACCEL_DEV 0x18
+#define ACCEL_X_REG 0x3
+#define ACCEL_Y_REG 0x5
+#define ACCEL_Z_REG 0x7
 
 #define SPI_MAX_PINS 7
 #define PIN_FLAG 64
+
+#define I2C_DEV_COUNT 5
+#define I2C_REG_COUNT 5
 
 #endif

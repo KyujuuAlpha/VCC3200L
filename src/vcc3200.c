@@ -15,6 +15,48 @@
 #include "prcm.h"
 #include "config.h"
 #include "oled.h"
+#include "i2c_if.h"
+
+// ACCELEROMETER STUFF
+static int initialX = 0, initialY = 0;
+
+static gboolean mouseMotionAccel(GtkWidget *w, GdkEventMotion *e) {
+  int x = (int) e->x_root - initialX;
+  int y = (int) e->y_root - initialY;
+  if (x > 100) {
+    x = 100;
+  } else if (x < -100) {
+    x = -100;
+  }
+  if (y > 100) {
+    y = 100;
+  } else if (y < -100) {
+    y = -100;
+  }
+  writeRegister(ACCEL_DEV, ACCEL_Y_REG, x > 0 ? 255 - (int)((x / 250.0) * 255) : 255 - (int)((x / 250.0) * 255));
+  writeRegister(ACCEL_DEV, ACCEL_X_REG, y > 0 ? 255 - (int)((y / 250.0) * 255) : 255 - (int)((y / 250.0) * 255));
+  return TRUE;
+}
+
+static gboolean mouseClickAccel(GtkWidget *w, GdkEventMotion *e) {
+  initialX = (int) e->x_root;
+  initialY = (int) e->y_root;
+  return TRUE;
+}
+
+static GtkWidget *createAccelWindow(GtkApplication *app) {
+  GtkWidget *accelWindow;
+
+  accelWindow = gtk_application_window_new(app);
+  gtk_window_set_title(GTK_WINDOW(accelWindow), "Accelerometer");
+  gtk_window_set_default_size(GTK_WINDOW(accelWindow), 300, 300);
+  gtk_window_set_resizable(GTK_WINDOW(accelWindow), FALSE);
+
+  g_signal_connect(accelWindow, "motion_notify_event", G_CALLBACK(mouseMotionAccel), NULL);
+  g_signal_connect(accelWindow, "button_press_event", G_CALLBACK(mouseClickAccel), NULL);
+
+  return accelWindow;
+}
 
 // SWITCH STUFF
 static void switch2Activated(GtkWidget *widget, gpointer data) {
@@ -269,10 +311,10 @@ static GtkWidget *createOLEDWindow(GtkApplication *app) {
 
   oledWindow = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(oledWindow), "OLED");
-  gtk_window_set_default_size(GTK_WINDOW (oledWindow), OLED_WIDTH * 2, OLED_HEIGHT * 2);
+  gtk_window_set_default_size(GTK_WINDOW (oledWindow), OLED_WIDTH * 3, OLED_HEIGHT * 3);
 
   oledArea = gtk_drawing_area_new();
-  gtk_widget_set_size_request(oledArea, OLED_WIDTH * 2, OLED_HEIGHT * 2);
+  gtk_widget_set_size_request(oledArea, OLED_WIDTH * 3, OLED_HEIGHT * 3);
   g_signal_connect(G_OBJECT(oledArea), "draw", G_CALLBACK(oledDraw), NULL);
   gtk_container_add(GTK_CONTAINER(oledWindow), oledArea);
 
@@ -306,6 +348,10 @@ static void gtkInit(GtkApplication *app, gpointer user_data) {
   if (ENABLE_OLED) {
     GtkWidget *oledWindow = createOLEDWindow(app);
     gtk_widget_show_all(oledWindow);
+  }
+  if (ENABLE_ACCEL) {
+    GtkWidget *accelWindow = createAccelWindow(app);
+    gtk_widget_show_all(accelWindow);
   }
 }
 

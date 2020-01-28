@@ -87,6 +87,8 @@ extern int I2C_IF_ReadFrom(unsigned char ucDevAddr,
             unsigned char *pucRdDataBuf,
             unsigned char ucRdLen);
 
+void writeRegister(unsigned char dev, unsigned char reg, int data);
+
 //*****************************************************************************
 //
 // Mark the end of the C bindings section for C++ compilers.
