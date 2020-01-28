@@ -29,6 +29,7 @@ void SPIConfigSetExpClk(unsigned long ulBase,unsigned long ulSPIClk,
             }
 
 void SPIEnable(unsigned long ulBase) {
+    printf("Enabled SPI interface\n");
     bool flag = false;
     for (int i = PIN_01; i <= PIN_64; i++) {
         if (getPinMode(i) == PIN_MODE_2) {

@@ -14,6 +14,7 @@ struct Device {
 static struct Device devices[I2C_DEV_COUNT];
 
 int I2C_IF_Open(unsigned long ulMode) {
+    printf("Enabled I2C interface\n");
     for (int i = 0; i < I2C_DEV_COUNT; i++) {
         devices[i] = (struct Device) { .id = -1, .reg = 0, .registers = {} };
         for (int j = 0; j < I2C_REG_COUNT; j++) {
