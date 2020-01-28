@@ -141,8 +141,8 @@ struct OLEDPixel {
   bool change;
 };
 static bool oledFlag;
-static int x1 = 0, x2 = 0, y1 = 0, y2 = 0, currX = 0, currY = 0;
-static unsigned char cmd = 0, data = 0, color = 0;
+static int x1 = 0, x2 = 0, y1 = 0, y2 = 0, currX = 0, currY = 0, color = 0;
+static unsigned char cmd = 0, data = 0;
 static struct OLEDPixel display[OLED_HEIGHT][OLED_WIDTH];
 
 
@@ -197,15 +197,16 @@ static void *oledProcessingThread(void *var) {
             y2 = val > OLED_HEIGHT ? OLED_HEIGHT - 1 : val < 0 ? 0 : val;
           }
         } else if (cmd == CMD_WRITERAM) {
-          if (data == 0) {
+          if (data == 0) { //upper 2 bits
             data = 1;
-          } else if (data == 1) {
             color = val;
+          } else if (data == 1) { //lower 2 bits
             data = 0;
+            color = (color << 8) | val;
             display[currY][currX].change = true;
-            display[currY][currX].color.red = ((color & 0xF800) >> 11) / 31;
-            display[currY][currX].color.green = ((color & 0x07E0) >> 5) / 63;
-            display[currY][currX].color.blue = (color & 0x001F) / 31;
+            display[currY][currX].color.red = (((color & 0xF800) >> 11)) / 31.0;
+            display[currY][currX].color.green = (((color & 0x07E0) >> 5)) / 63.0;
+            display[currY][currX].color.blue = ((color & 0x001F)) / 31.0;
             currX++;
             if (currX > x2) {
               currX = x1;
