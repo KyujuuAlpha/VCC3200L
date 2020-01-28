@@ -23,7 +23,7 @@
 #define OLED_R    PIN_08
 #define OLED_OC   PIN_06
 
-#define ENABLE_ACCEL 1
+#define ENABLE_ACCEL 0
 #define ACCEL_DEV 0x18
 #define ACCEL_X_REG 0x3
 #define ACCEL_Y_REG 0x5
@@ -34,5 +34,7 @@
 
 #define I2C_DEV_COUNT 5
 #define I2C_REG_COUNT 5
+
+#define ENABLE_DEBUG 0
 
 #endif

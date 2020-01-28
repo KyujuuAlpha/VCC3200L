@@ -338,22 +338,30 @@ static GtkWidget *createOLEDWindow(GtkApplication *app) {
 // MAIN GUI STUFF
 static void gtkInit(GtkApplication *app, gpointer user_data) {
   if (ENABLE_SWITCHES) {
-    printf("Enabled switches\n");
+    if (ENABLE_DEBUG) {
+      printf("Enabled switches\n");
+    }
     GtkWidget *switchWindow = createSwitchWindow(app);
     gtk_widget_show_all(switchWindow);
   }
   if (ENABLE_LEDS) {
-    printf("Enabled LEDs\n");
+    if (ENABLE_DEBUG) {
+     printf("Enabled LEDs\n");
+    }
     GtkWidget *ledWindow = createLEDWindow(app);
     gtk_widget_show_all(ledWindow);
   }
   if (ENABLE_OLED) {
-    printf("Enabled OLED\n");
+    if (ENABLE_DEBUG) {
+      printf("Enabled OLED\n");
+    }
     GtkWidget *oledWindow = createOLEDWindow(app);
     gtk_widget_show_all(oledWindow);
   }
   if (ENABLE_ACCEL) {
-    printf("Enabled accelerometer\n");
+    if (ENABLE_DEBUG) {
+      printf("Enabled accelerometer\n");
+    }
     GtkWidget *accelWindow = createAccelWindow(app);
     gtk_widget_show_all(accelWindow);
   }
@@ -368,7 +376,9 @@ static void *guiThread(void *var) {
 }
 
 void init(void) {
-  printf("Initialized virtualized C3200\n");
+  if (ENABLE_DEBUG) {
+    printf("Initialized virtualized C3200\n");
+  }
   for (int i = PIN_01; i <= PIN_64; i++) {
     PinModeSet(i, PIN_MODE_0);
   }
