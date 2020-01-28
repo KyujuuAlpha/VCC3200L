@@ -33,8 +33,8 @@ static gboolean mouseMotionAccel(GtkWidget *w, GdkEventMotion *e) {
   } else if (y < -100) {
     y = -100;
   }
-  writeRegister(ACCEL_DEV, ACCEL_Y_REG, x > 0 ? 255 - (int)((x / 250.0) * 255) : 255 - (int)((x / 250.0) * 255));
-  writeRegister(ACCEL_DEV, ACCEL_X_REG, y > 0 ? 255 - (int)((y / 250.0) * 255) : 255 - (int)((y / 250.0) * 255));
+  writeRegister(ACCEL_DEV, ACCEL_Y_REG, x > 0 ? 255 - (int)((x / 300.0) * 255) : 255 - (int)((x / 300.0) * 255));
+  writeRegister(ACCEL_DEV, ACCEL_X_REG, y > 0 ? 255 - (int)((y / 300.0) * 255) : 255 - (int)((y / 300.0) * 255));
   return TRUE;
 }
 

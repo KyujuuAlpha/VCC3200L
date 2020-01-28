@@ -4,7 +4,7 @@ In development, so not all features have been added as of yet.
 
 Depends on pthreads and GTK 3.0
 
-VERY IMPORTANT NOTE: This is still early in development and so far only LEDs, switches, and UART works.  In the near future, will be able to change directives in a config.h to enable other peripherals as well (SPI, Adafruit display, etc.)
+VERY IMPORTANT NOTE: This is still early in development and so far only LEDs, switches, UART, OLED, and Accelerometer (x & y) works.  In the near future, will be able to change directives in a config.h to enable other peripherals as well (SPI, Adafruit display, etc.)
 
 To compile, first make sure GTK 3 is installed and run: 
 ```
