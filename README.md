@@ -17,3 +17,6 @@ make
 And a static library should be generated in the lib directory
 
 Use the generated library as a normal static library, but don't forget to include the headers, GTK-3.0, and libpthreads when compiling your program.
+
+## Notice
+Headers from the TI CC3200 SDK are used to maintain code compatibility with physical boards.  The code is given as is and should not be held responsible for any issues that arise from this library.
